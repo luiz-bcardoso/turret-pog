@@ -39,24 +39,33 @@ while True:
 
             # Calculate the center of the PERSON
             person_center_x = int((x1 + x2) / 2)
+            distance_from_center = person_center_x - screen_center_x
+            motor_speed = 0
             
             # --- COLOR LOGIC ---
             # Check if person is inside the threshold area
-            if abs(person_center_x - screen_center_x) < threshold:
-                # LOCKED -> Make it RED
-                current_color = COLOR_RED
+            if abs(distance_from_center) <= threshold:
+                # Inside the Safe Zone (Green Lines)
+                motor_speed = 0
                 text = "LOCKED [FIRE]"
-                print("Target Locked!")
+                current_color = COLOR_RED
             else:
-                # TRACKING -> Make it BLUE
+                # Outside the zone - Calculate how far out we are
+                # We subtract the threshold so the motor starts slow right at the line
+                if distance_from_center > 0:
+                    # Target is to the RIGHT
+                    motor_speed = distance_from_center - threshold
+                    text = f"RIGHT (+{motor_speed})"
+                else:
+                    # Target is to the LEFT
+                    motor_speed = distance_from_center + threshold
+                    text = f"LEFT ({motor_speed})"
+                
                 current_color = COLOR_BLUE
-                text = "TRACKING"
                 
                 # Print direction (optional)
-                if person_center_x < screen_center_x:
-                    print("Target Left")
-                else:
-                    print("Target Right")
+                if motor_speed != 0:
+                    print(f"MOVE MOTOR: {motor_speed}")
 
             # --- DRAWING ---
             # Draw the box
